@@ -7,7 +7,7 @@ import copy
 
 # try: # Used to patch an error in the generation of the documentation
 import sys
-sys.path.insert(0, "/Users/pierrebouvet/Documents/Code/HDF5_BLS/HDF5_BLS")
+sys.path.insert(0, "/Users/pierrebouvet/Documents/Code/HDF5_BLS_v1/HDF5_BLS")
 from load_data import load_general, load_dat_file, load_tiff_file
 from treat import Treat
 # except:
