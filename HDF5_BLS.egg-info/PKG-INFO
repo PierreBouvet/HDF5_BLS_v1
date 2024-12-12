@@ -1,0 +1,16 @@
+Metadata-Version: 2.1
+Name: HDF5_BLS
+Version: 0.1.0
+Summary: A package to read and write HDF5 files for the BioBrillouin lab
+Author: Pierre Bouvet
+Author-email: pierre.bouvet@meduniwien.ac.at
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Requires-Python: >=3.6
+License-File: LICENSE.md
+Requires-Dist: h5py>=3.12
+Requires-Dist: numpy>=2.0
+Requires-Dist: Pillow>=10.0.1
+Requires-Dist: pytest
+Requires-Dist: tox
