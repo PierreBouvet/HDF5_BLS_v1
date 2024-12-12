@@ -1,5 +1,9 @@
 import pytest
+import sys
+
+sys.path.insert(0, "/Users/pierrebouvet/Documents/Code/HDF5_BLS_v1")
 from HDF5_BLS.wrapper import Wrapper
+
 import numpy as np
 
 
@@ -55,3 +59,11 @@ def test_add_data_to_group():
                   "Data_1": wrp_1})
     
     wrp.add_data_to_group(np.array([[3]]), group = "Data_0.Data_0", name = "Treated")
+
+    assert len(wrp.data.keys()) == 2, "FAILURE - test_add_data_to_group - The number of top-level elements was changed"
+    assert len(wrp.data["Data_0"].data.keys()) == 1, "FAILURE - test_add_data_to_group - The number of 1st level elements was changed"
+    assert len(wrp.data["Data_1"].data.keys()) == 3, "FAILURE - test_add_data_to_group - Elements were not added correctly"
+    assert len(wrp.data["Data_0"].data["Data_0"].data.keys()) == 4, "FAILURE - test_add_data_to_group - Elements were not added correctly"
+
+
+test_add_data_to_group()

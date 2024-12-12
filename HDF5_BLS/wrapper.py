@@ -5,14 +5,8 @@ import os
 from PIL import Image
 import copy
 
-# try: # Used to patch an error in the generation of the documentation
-import sys
-sys.path.insert(0, "/Users/pierrebouvet/Documents/Code/HDF5_BLS_v1/HDF5_BLS")
-from load_data import load_general, load_dat_file, load_tiff_file
-from treat import Treat
-# except:
-#     from HDF5_BLS.load_data import load_general, load_dat_file, load_tiff_file
-#     from HDF5_BLS.treat import Treat
+from HDF5_BLS.load_data import load_general, load_dat_file, load_tiff_file
+from HDF5_BLS.treat import Treat
     
 
 BLS_HDF5_Version = "0.0"
@@ -125,33 +119,29 @@ class Wrapper:
             The name of the data group, by default the name is the identifier of the group "Data_i".
         """
         # Find the position where to add the spectrum
-        par = self.data 
-        par_attr = self.data_attributes
-        loc = group.split(".")
-        print(loc)
-        par = self.data 
+        par = self
         loc = group.split(".")
         while len(loc)>0:
             temp = loc[0]
+            par = par.data
             if not temp in par.keys():
                 par[temp] = Wrapper()
-            par = par[temp].data
-            par_attr = par_attr[temp].data_attributes
+            par = par[temp]
             loc.pop(0)
         
         # Checking the shape of the data
-        shape = par[f"Raw_data"].shape
+        shape = par.data[f"Raw_data"].shape
         assert data.shape == shape, WrapperError(f"The shape of the data to add to the data object ({data.shape}) is different from the shape of the raw data in the group ({shape}).")
 
         # Getting the i number of Data_i where to store the data
         i = 0
-        while f"Raw_data_{i}" in par.keys(): i+=1
+        while f"Raw_data_{i}" in par.data.keys(): i+=1
 
         # Adding the data to the wrapper
-        par[f"Raw_data_{i}"] = data
+        par.data[f"Raw_data_{i}"] = data
 
         # Adding the attributes of the data and the abscissa to the wrapper
-        if name is not None: par_attr[f"Raw_data_{i}"]["Name"] = name
+        if name is not None: par.data_attributes[f"Raw_data_{i}"] = {"Name": name}
 
     def assign_name_all_abscissa(self, abscissa):
         """Adds as attributes of the abscissas and the raw data, the names of the abscissas
