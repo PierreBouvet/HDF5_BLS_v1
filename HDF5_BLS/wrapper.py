@@ -294,7 +294,7 @@ class Wrapper:
         self.data["Raw_data"] = data
         self.data_attributes["Raw_data"] = {"ID":"Raw_data"}
         if store_filepath: self.data_attributes["Raw_data"]["Filepath"] = filepath
-        attributes["MEASURE.Dimensionnality_of_measure"]=len(data.shape)
+        attributes["MEASURE.Dimensionnality_of_measure"] = len(data.shape)
         self.data_attributes["Raw_data"]["Name"] = "Raw data"
         
         # Generate the abscissa corresponding to the different dimensions
@@ -302,7 +302,7 @@ class Wrapper:
         for i, k in enumerate(data.shape):
             self.data[f"Abscissa_{i}"] = np.arange(k)
             self.data_attributes[f"Abscissa_{i}"] = {"ID":f"Abscissa_{i}"}
-            abscissa_name = abscissa_name+"_,"
+            abscissa_name = abscissa_name + "_,"
         attributes["MEASURE.Abscissa_Names"] = abscissa_name[:-1]
 
         #Indicates the version of the BLS_HDF5 library
@@ -524,3 +524,4 @@ def add_data_to_wrapper(wrapper, file_path, data_attributes, abscissa_from_attri
             print(f"Attribute {k} already exists in the wrapper")    
             
     return wrapper       
+
