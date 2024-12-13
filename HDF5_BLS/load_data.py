@@ -4,7 +4,7 @@ import os
 from PIL import Image
 import h5py
 
-def load_dat_file(filepath, creator = "GHOST"):
+def load_dat_file(filepath, creator = "GHOST"): # Test made for GHOST
     """Loads DAT files. The DAT files that can be read are obtained from the following configurations:
     - GHOST software
     - local exports with header
@@ -60,7 +60,7 @@ def load_dat_file(filepath, creator = "GHOST"):
         attributes['SPECTROMETER.Spectral_Resolution'] = str(spectral_resolution)
         return data, attributes
 
-def load_tiff_file(filepath):
+def load_tiff_file(filepath): # Test made
     """Loads files obtained with the GHOST software
 
     Parameters
@@ -82,11 +82,12 @@ def load_tiff_file(filepath):
     im = Image.open(filepath)
     data = np.array(im)
 
+    name = ".".join(os.path.basename(filepath).split(".")[:-1])
     attributes['FILEPROP.Name'] = name
 
     return data, attributes
 
-def load_general(filepath):
+def load_general(filepath): # Test made 
     """Loads files based on their extensions
 
     Parameters
@@ -109,8 +110,5 @@ def load_general(filepath):
     elif file_extension.lower() == ".tif":
         # Load .TIFF file format data
         return load_tiff_file(filepath)
-    elif file_extension.lower() == ".h5":
-        # Load .TIFF file format data
-        return load_hdf5_file(filepath)
     else:
         raise ValueError(f"Unsupported file format: {file_extension}")
