@@ -241,15 +241,22 @@ class Wrapper:
         WrapperError
             If the dimension given is higher than the dimension of the data
         """
-        if dimension >= len(self.data["Raw_data"].shape):
-            raise WrapperError("The dimension provided for the abscissa is too large considering the size of the raw data")
+        assert dimension < len(self.data["Raw_data"].shape), WrapperError("The dimension provided for the abscissa is too large considering the size of the raw data")
+
         self.data[f"Abscissa_{dimension}"], _ = load_general(filepath)
         if not name is None:
+            if not f"Abscissa_{dimension}" in self.data_attributes.keys(): 
+                self.data_attributes[f"Abscissa_{dimension}"] = {}
             self.data_attributes[f"Abscissa_{dimension}"]["Name"] = name
-            temp = self.attributes["MEASURE.Abscissa_Names"].split(",")
-            temp[dimension] = name
-            self.attributes["MEASURE.Abscissa_Names"] = ",".join(temp)
-
+        
+            abscissa = []
+            for k in range(len(self.data["Raw_data"].shape)):
+                if not f"Abscissa_{k}" in self.data_attributes.keys(): 
+                    abscissa.append(f"Abscissa_{k}")
+                else:    
+                    abscissa.append(self.data_attributes[f"Abscissa_{k}"]["Name"])
+            self.attributes["MEASURE.Abscissa_Names"] = ','.join(abscissa)
+        
     def import_properties_data(self, filepath):
         """Imports properties from a CSV file into a dictionary.
     
