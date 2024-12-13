@@ -4,8 +4,10 @@ import os
 from PIL import Image
 import h5py
 
-def load_dat_file(filepath):
-    """Loads files obtained with the GHOST software
+def load_dat_file(filepath, creator = "GHOST"):
+    """Loads DAT files. The DAT files that can be read are obtained from the following configurations:
+    - GHOST software
+    - local exports with header
 
     Parameters
     ----------
@@ -24,37 +26,39 @@ def load_dat_file(filepath):
     name, _ = os.path.splitext(filepath)
     attributes = {}
     
-    with open(filepath, 'r') as file:
-        lines = file.readlines()
-        # Extract metadata
-        for line in lines:
-            if line.strip() == '':
-                continue  # Skip empty lines
-            if any(char.isdigit() for char in line.split()[0]):
-                break  # Stop at the first number
-            else:
-                # Split metadata into key-value pairs
-                if ':' in line:
-                    key, value = line.split(':', 1)
-                    metadata[key.strip()] = value.strip()
-        # Extract numerical data
-        for line in lines:
-            if line.strip().isdigit():
-                data.append(int(line.strip()))
-    data = np.array(data)
-    attributes['FILEPROP.Name'] = name.split("/")[-1]
-    attributes['MEASURE.Sample'] = metadata["Sample"]
-    attributes['MEASURE.Date'] = "Not Specified"
-    attributes['SPECTROMETER.Scanning_Strategy'] = "point_scanning"
-    attributes['SPECTROMETER.Type'] = "TFP"
-    attributes['SPECTROMETER.Illumination_Type'] = "CW"
-    attributes['SPECTROMETER.Detector_Type'] = "Photon Counter"
-    attributes['SPECTROMETER.Filtering_Module'] = "None"
-    attributes['SPECTROMETER.Wavelength_nm'] = metadata["Wavelength"]
-    attributes['SPECTROMETER.Scan_Amplitude'] = metadata["Scan amplitude"]
-    spectral_resolution = float(float(metadata["Scan amplitude"])/data.shape[-1])
-    attributes['SPECTROMETER.Spectral_Resolution'] = str(spectral_resolution)
-    return data, attributes
+    if creator == "GHOST":
+        with open(filepath, 'r') as file:
+            lines = file.readlines()
+            # Extract metadata
+            for line in lines:
+                if line.strip() == '':
+                    continue  # Skip empty lines
+                if any(char.isdigit() for char in line.split()[0]):
+                    break  # Stop at the first number
+                else:
+                    # Split metadata into key-value pairs
+                    if ':' in line:
+                        key, value = line.split(':', 1)
+                        metadata[key.strip()] = value.strip()
+            # Extract numerical data
+            for line in lines:
+                if line.strip().isdigit():
+                    data.append(int(line.strip()))
+
+        data = np.array(data)
+        attributes['FILEPROP.Name'] = name.split("/")[-1]
+        attributes['MEASURE.Sample'] = metadata["Sample"]
+        attributes['MEASURE.Date'] = ""
+        attributes['SPECTROMETER.Scanning_Strategy'] = "point_scanning"
+        attributes['SPECTROMETER.Type'] = "TFP"
+        attributes['SPECTROMETER.Illumination_Type'] = "CW"
+        attributes['SPECTROMETER.Detector_Type'] = "Photon Counter"
+        attributes['SPECTROMETER.Filtering_Module'] = "None"
+        attributes['SPECTROMETER.Wavelength_nm'] = metadata["Wavelength"]
+        attributes['SPECTROMETER.Scan_Amplitude'] = metadata["Scan amplitude"]
+        spectral_resolution = float(float(metadata["Scan amplitude"])/data.shape[-1])
+        attributes['SPECTROMETER.Spectral_Resolution'] = str(spectral_resolution)
+        return data, attributes
 
 def load_tiff_file(filepath):
     """Loads files obtained with the GHOST software

@@ -1,4 +1,4 @@
 .vscode/
 .venv/
 .pytest_cache/
-HDF5_BLS.egg-info/
+tests/example_creator.py
