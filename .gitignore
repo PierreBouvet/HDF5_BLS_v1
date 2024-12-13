@@ -1,4 +1,4 @@
 .vscode/
 .venv/
 .pytest_cache/
-.HDF5_BLS.egg-info/
+HDF5_BLS.egg-info/
