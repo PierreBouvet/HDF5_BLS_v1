@@ -72,7 +72,7 @@ class Wrapper:
         else:
             self.attributes, self.data, self.data_attributes = merge_wrappers([self,wrp_h5])
     
-    def add_data_group_to_wrapper(self, data, parent_group = None, name = None):
+    def add_data_group_to_wrapper(self, data, parent_group = None, name = None): # Test made
         """Adds data to the wrapper by creating a new group.
 
         Parameters
@@ -106,7 +106,7 @@ class Wrapper:
                                    data_attributes = {})
         for j, e in enumerate(data.shape): par[f"Data_{i}"].data[f"Abscissa_{j}"] = np.arange(e)
     
-    def add_data_to_group(self, data, group, name = None):
+    def add_data_to_group(self, data, group, name = None): # Test made
         """Adds an array to an existing data group.
 
         Parameters
@@ -143,7 +143,7 @@ class Wrapper:
         # Adding the attributes of the data and the abscissa to the wrapper
         if name is not None: par.data_attributes[f"Raw_data_{i}"] = {"Name": name}
 
-    def assign_name_all_abscissa(self, abscissa):
+    def assign_name_all_abscissa(self, abscissa): # Test made
         """Adds as attributes of the abscissas and the raw data, the names of the abscissas
 
         Parameters
@@ -158,13 +158,14 @@ class Wrapper:
         """
         # Adds the names of the abscissas to the attributes of the Raw data
         abscissa = abscissa.split(",")
-        if len(abscissa) != len(self.data["Raw_data"].shape):
-            raise WrapperError("The names provided for the abscissa do not match the shape of the raw data")
-        else:
-            for i, e in enumerate(abscissa): self.data_attributes[f"Abscissa_{i}"]["Name"] = e 
-            self.attributes["MEASURE.Abscissa_Names"] = ','.join(abscissa)
+        assert len(abscissa) == len(self.data["Raw_data"].shape), WrapperError("The names provided for the abscissa do not match the shape of the raw data")
+        for i, e in enumerate(abscissa): 
+            if not f"Abscissa_{i}" in self.data_attributes.keys(): 
+                self.data_attributes[f"Abscissa_{i}"] = {}
+            self.data_attributes[f"Abscissa_{i}"]["Name"] = e 
+        self.attributes["MEASURE.Abscissa_Names"] = ','.join(abscissa)
         
-    def assign_name_one_abscissa(self, abscissa_nb, name):
+    def assign_name_one_abscissa(self, abscissa_nb, name): # Test made
         """Adds as attributes of the abscissas and the raw data, the names of the abscissas
 
         Parameters
@@ -175,14 +176,20 @@ class Wrapper:
             The new name of the abscissa to rename
         """
         # Adds the names of the abscissas to the attributes of the Raw data
+        if not f"Abscissa_{abscissa_nb}" in self.data_attributes.keys(): 
+            self.data_attributes[f"Abscissa_{abscissa_nb}"] = {}
+        self.data_attributes[f"Abscissa_{abscissa_nb}"]["Name"] = name
+
+        # Adds the names of the abscissas to the attributes of the wrapper
         abscissa = []
-        for k in self.data_attributes.keys():
-            if k.split("_")[-1] == abscissa_nb:
-                self.data_attributes[f"Abscissa_{abscissa_nb}"]["Name"] = name
-            abscissa.append(self.data_attributes[f"Abscissa_{abscissa_nb}"]["Name"])
+        for k in range(len(self.data["Raw_data"].shape)):
+            if not f"Abscissa_{k}" in self.data_attributes.keys(): 
+                abscissa.append(f"Abscissa_{k}")
+            else:    
+                abscissa.append(self.data_attributes[f"Abscissa_{k}"]["Name"])
         self.attributes["MEASURE.Abscissa_Names"] = ','.join(abscissa)
 
-    def create_abscissa_1D_min_max(self, dimension, min, max, name = None):
+    def create_abscissa_1D_min_max(self, dimension, min, max, name = None): # Test made
         """Creates an abscissa from a minimal and maximal value
 
         Parameters
@@ -201,20 +208,22 @@ class Wrapper:
         WrapperError
             If the dimension given is higher than the dimension of the data
         """
-        if dimension >= len(self.data["Raw_data"].shape):
-            raise WrapperError("The dimension provided for the abscissa is too large considering the size of the raw data")
+        assert dimension < len(self.data["Raw_data"].shape), WrapperError("The dimension provided for the abscissa is too large considering the size of the raw data")
+        
         self.data[f"Abscissa_{dimension}"] = np.linspace(min, max, self.data["Raw_data"].shape[dimension])
         if not name is None:
+            if not f"Abscissa_{dimension}" in self.data_attributes.keys(): 
+                self.data_attributes[f"Abscissa_{dimension}"] = {}
             self.data_attributes[f"Abscissa_{dimension}"]["Name"] = name
-            temp = self.attributes["MEASURE.Abscissa_Names"].split(",")
-            temp[dimension] = name
-            self.attributes["MEASURE.Abscissa_Names"] = ",".join(temp)
-        else:
-            self.data_attributes[f"Abscissa_{dimension}"]["Name"] = "Abscissa"
-            temp = self.attributes["MEASURE.Abscissa_Names"].split(",")
-            temp[dimension] = "Abscissa"
-            self.attributes["MEASURE.Abscissa_Names"] = ",".join(temp)
-    
+
+            abscissa = []
+            for k in range(len(self.data["Raw_data"].shape)):
+                if not f"Abscissa_{k}" in self.data_attributes.keys(): 
+                    abscissa.append(f"Abscissa_{k}")
+                else:    
+                    abscissa.append(self.data_attributes[f"Abscissa_{k}"]["Name"])
+            self.attributes["MEASURE.Abscissa_Names"] = ','.join(abscissa)
+
     def import_abscissa_1D(self, dimension, filepath, name = None):
         """Creates an abscissa from a minimal and maximal value
 

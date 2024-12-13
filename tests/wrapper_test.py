@@ -64,3 +64,36 @@ def test_add_data_to_group():
     assert len(wrp.data["Data_0"].data.keys()) == 1, "FAILURE - test_add_data_to_group - The number of 1st level elements was changed"
     assert len(wrp.data["Data_1"].data.keys()) == 3, "FAILURE - test_add_data_to_group - Elements were not added correctly"
     assert len(wrp.data["Data_0"].data["Data_0"].data.keys()) == 4, "FAILURE - test_add_data_to_group - Elements were not added correctly"
+
+def test_assign_name_all_abscissa():
+    wrp= Wrapper({"ID": "Data_0", "Name": "t = 1s"}, 
+                 {"Raw_data": np.array([[1]]), "Abscissa_0": np.array([0]), "Abscissa_1": np.array([0])}, 
+                 {})
+    
+    wrp.assign_name_all_abscissa("Channels,Time")
+
+    assert len(wrp.data_attributes.keys()) == 2, "FAILURE - test_assign_name_all_abscissa - The number of abscissa changed"
+    assert wrp.data_attributes["Abscissa_0"]["Name"] == "Channels", "FAILURE - test_assign_name_all_abscissa - The name of the abscissa is wrong"
+    assert wrp.data_attributes["Abscissa_1"]["Name"] == "Time", "FAILURE - test_assign_name_all_abscissa - The name of the abscissa is wrong"
+    assert wrp.attributes["MEASURE.Abscissa_Names"] == "Channels,Time", "FAILURE - test_assign_name_all_abscissa - The name of the abscissa stored in the attributes of the wrapperis wrong"
+
+def test_assign_name_one_abscissa():
+    wrp= Wrapper({"ID": "Data_0", "Name": "t = 1s"}, 
+                 {"Raw_data": np.array([[1]]), "Abscissa_0": np.array([0]), "Abscissa_1": np.array([0])}, 
+                 {})
+    
+    wrp.assign_name_one_abscissa(0, "Channels")
+    
+    assert wrp.data_attributes["Abscissa_0"]["Name"] == "Channels", "FAILURE - test_assign_name_one_abscissa - The name of the abscissa is wrong"
+    assert wrp.attributes["MEASURE.Abscissa_Names"] == "Channels,Abscissa_1", "FAILURE - test_assign_name_one_abscissa - The name of the abscissa stored in the attributes of the wrapperis wrong"
+
+def test_create_abscissa_1D_min_max():
+    wrp= Wrapper({"ID": "Data_0", "Name": "t = 1s"}, 
+                 {"Raw_data": np.random.random(512), "Abscissa_0": np.array([0])}, 
+                 {})
+    
+    wrp.create_abscissa_1D_min_max(0, 0, 60, "Frequency (GHz)")
+
+    assert wrp.data["Abscissa_0"].shape == wrp.data["Raw_data"].shape, "FAILURE - test_create_abscissa_1D_min_max - The shape of the abscissa is wrong"
+    assert wrp.data_attributes["Abscissa_0"]["Name"] == "Frequency (GHz)", "FAILURE - test_create_abscissa_1D_min_max - The name of the abscissa is wrong"
+    assert wrp.attributes["MEASURE.Abscissa_Names"] == "Frequency (GHz)", "FAILURE - test_create_abscissa_1D_min_max - The name of the abscissa stored in the attributes of the wrapperis wrong"
