@@ -1,5 +1,6 @@
 import pytest
 import sys
+import os
 
 sys.path.insert(0, "/Users/pierrebouvet/Documents/Code/HDF5_BLS_v1")
 from HDF5_BLS.wrapper import Wrapper
@@ -97,3 +98,16 @@ def test_create_abscissa_1D_min_max():
     assert wrp.data["Abscissa_0"].shape == wrp.data["Raw_data"].shape, "FAILURE - test_create_abscissa_1D_min_max - The shape of the abscissa is wrong"
     assert wrp.data_attributes["Abscissa_0"]["Name"] == "Frequency (GHz)", "FAILURE - test_create_abscissa_1D_min_max - The name of the abscissa is wrong"
     assert wrp.attributes["MEASURE.Abscissa_Names"] == "Frequency (GHz)", "FAILURE - test_create_abscissa_1D_min_max - The name of the abscissa stored in the attributes of the wrapperis wrong"
+
+def test_import_abscissa_1D():
+    wrp= Wrapper({"ID": "Data_0", "Name": "t = 1s"}, 
+                 {"Raw_data": np.random.random(512), "Abscissa_0": np.array([0])}, 
+                 {})
+    
+    wrp.import_abscissa_1D(0, os.path.join(os.path.dirname(__file__), "test_data", "example_abscissa_GHOST.npy"), "Frequency (GHz)")
+
+    assert wrp.data["Abscissa_0"].shape == wrp.data["Raw_data"].shape, "FAILURE - test_import_abscissa_1D - The shape of the abscissa is wrong"
+    assert wrp.data_attributes["Abscissa_0"]["Name"] == "Frequency (GHz)", "FAILURE - test_import_abscissa_1D - The name of the abscissa is wrong"
+    assert wrp.attributes["MEASURE.Abscissa_Names"] == "Frequency (GHz)", "FAILURE - test_import_abscissa_1D - The name of the abscissa stored in the attributes of the wrapperis wrong"   
+
+

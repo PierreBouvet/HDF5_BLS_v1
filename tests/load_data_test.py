@@ -3,7 +3,7 @@ import sys
 import os
 
 sys.path.insert(0, "/Users/pierrebouvet/Documents/Code/HDF5_BLS_v1")
-from HDF5_BLS.load_data import load_dat_file, load_tiff_file, load_general
+from HDF5_BLS.load_data import load_dat_file, load_tiff_file, load_general, load_npy_file
 
 def test_load_dat_file():
     filepath = os.path.join(os.path.dirname(__file__), "test_data", "example_GHOST.DAT")
@@ -24,6 +24,15 @@ def test_load_tiff_file():
     assert data.shape == (512,512), "FAIL - test_load_tiff_file - data shape is not correct"
     assert attributes == dic_verif, "FAIL - test_load_tiff_file - Attributes are not correct"
 
+def test_load_npy_file():
+    filepath = os.path.join(os.path.dirname(__file__), "test_data", "example_abscissa_GHOST.npy")
+    data, attributes = load_npy_file(filepath)
+    
+    dic_verif = {'FILEPROP.Name': 'example_abscissa_GHOST'}
+
+    assert data.shape == (512,), "FAIL - test_load_npy_file - data shape is not correct"
+    assert attributes == dic_verif, "FAIL - test_load_npy_file - Attributes are not correct"
+
 def test_load_general():
     filepath = os.listdir(os.path.join(os.path.dirname(__file__), "test_data"))
 
@@ -31,3 +40,4 @@ def test_load_general():
         _, attributes = load_general(os.path.join(os.path.dirname(__file__), "test_data",fp))
         name = ".".join(os.path.basename(fp).split(".")[:-1])
         assert attributes['FILEPROP.Name'] == name
+

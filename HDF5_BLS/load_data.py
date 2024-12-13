@@ -87,6 +87,27 @@ def load_tiff_file(filepath): # Test made
 
     return data, attributes
 
+def load_npy_file(filepath): # Test made
+    """Loads npy files
+
+    Parameters
+    ----------
+    filepath : str                           
+        The filepath to the npy file
+    
+    Returns
+    -------
+    data : np.array
+        The data stored in the file
+    attributes : dic
+        A dictionnary with all the properties that could be recovered from the file
+    """
+    data = np.load(filepath)
+    attributes = {}
+    name = ".".join(os.path.basename(filepath).split(".")[:-1])
+    attributes['FILEPROP.Name'] = name
+    return data, attributes
+
 def load_general(filepath): # Test made 
     """Loads files based on their extensions
 
@@ -110,5 +131,8 @@ def load_general(filepath): # Test made
     elif file_extension.lower() == ".tif":
         # Load .TIFF file format data
         return load_tiff_file(filepath)
+    elif file_extension.lower() == ".npy":
+        # Load .npy file format data
+        return load_npy_file(filepath)
     else:
         raise ValueError(f"Unsupported file format: {file_extension}")

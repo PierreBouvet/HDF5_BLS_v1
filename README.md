@@ -4,6 +4,7 @@
 The library is currently compatible with the following file formats:
 - "*.DAT" files: spectra returned by the GHOST software
 - "*.TIF" files: an image format that can be used to export 2D detector images.
+- "*.npy" files: an arbitrary numpy array
 
 ## Installation
 

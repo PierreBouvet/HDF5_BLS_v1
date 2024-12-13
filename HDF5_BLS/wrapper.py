@@ -29,7 +29,7 @@ class Wrapper:
     data_attributes: dic
         The attributes specific to an array
     """
-    def __init__(self, attributes = {}, data = {}, data_attributes = {}):
+    def __init__(self, attributes = {}, data = {}, data_attributes = {}): # Test made
         self.attributes = attributes # Dictionnary storing all the attributes
         self.data = data # Dictionnary storing all the datasets or wrapper objects, group "Data" of HDF5 file
         self.data_attributes = data_attributes # Dictionnary storing all the attributes of all the data elements
@@ -190,7 +190,7 @@ class Wrapper:
         self.attributes["MEASURE.Abscissa_Names"] = ','.join(abscissa)
 
     def create_abscissa_1D_min_max(self, dimension, min, max, name = None): # Test made
-        """Creates an abscissa from a minimal and maximal value
+        """Creates an 1D abscissa array from a minimal and maximal value
 
         Parameters
         ----------
@@ -224,7 +224,7 @@ class Wrapper:
                     abscissa.append(self.data_attributes[f"Abscissa_{k}"]["Name"])
             self.attributes["MEASURE.Abscissa_Names"] = ','.join(abscissa)
 
-    def import_abscissa_1D(self, dimension, filepath, name = None):
+    def import_abscissa_1D(self, dimension, filepath, name = None): # Test made
         """Creates an abscissa from a minimal and maximal value
 
         Parameters
