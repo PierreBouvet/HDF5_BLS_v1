@@ -34,7 +34,7 @@ class Wrapper:
         self.data = data # Dictionnary storing all the datasets or wrapper objects, group "Data" of HDF5 file
         self.data_attributes = data_attributes # Dictionnary storing all the attributes of all the data elements
 
-    def add_hdf5_to_wrapper(self, filepath, parent_group = "Data"):
+    def add_hdf5_to_wrapper(self, filepath, parent_group = None):
         """Adds an hdf5 file to the wrapper by specifying in which group the data have to be stored. Default is the "Data" group. When adding the data, the attributes of the HDF5 file are only added to the created group if they are different from the parent's attribute.
 
         Parameters
@@ -60,10 +60,11 @@ class Wrapper:
         while f"Data_{i}" in par.keys(): i+=1
 
         wrp = load_hdf5_file(filepath)
-        print(wrp.data.keys())
+        # print(wrp.data.keys())
 
         # Adding the file to the wrapper
-        par[f"Data_{i}"] = load_hdf5_file(filepath)
+        wrp = load_hdf5_file(filepath)
+        par[f"Data_{i}"] = wrp
 
     def add_data_group_to_wrapper(self, data, parent_group = None, name = None): # Test made
         """Adds data to the wrapper by creating a new group.
@@ -298,35 +299,35 @@ class Wrapper:
                     if key in group.data_attributes.keys():
                         for k, v in group.data_attributes[key].items():
                             dg.attrs[k] = v
-                elif isinstance(group[key], Wrapper):
-                    save_group(data_group, group[key], key)
+                elif isinstance(group.data[key], Wrapper):
+                    save_group(data_group, group.data[key], key)
                 else:
                     raise WrapperError("Cannot add the selected type to HDF5 file")
                 
 
-        try:
-            with h5py.File(filepath, 'w') as hdf5_file:
-                # Save attributes
-                for key, value in self.attributes.items():
-                    hdf5_file.attrs[key] = value
+        # try:
+        with h5py.File(filepath, 'w') as hdf5_file:
+            # Save attributes
+            for key, value in self.attributes.items():
+                hdf5_file.attrs[key] = value
 
-                # Create Data group
-                data_group = hdf5_file.create_group("Data")
+            # Create Data group
+            data_group = hdf5_file.create_group("Data")
 
-                # Save datasets and apply the attributes
-                for key in self.data.keys():
-                    if isinstance(self.data[key], np.ndarray):
-                        dg = data_group.create_dataset(key, data=self.data[key])
-                    elif isinstance(self.data[key], Wrapper):
-                        save_group(data_group, self.data[key], key)
-                    else:
-                        raise WrapperError("Cannot add the selected type to HDF5 file")
-                    
-                    if key in self.data_attributes.keys():
-                        for k, v in self.data_attributes[key].items():
-                            dg.attrs[k] = v
-        except:
-            raise WrapperError("The wrapper could not be saved as a HDF5 file")
+            # Save datasets and apply the attributes
+            for key in self.data.keys():
+                if isinstance(self.data[key], np.ndarray):
+                    dg = data_group.create_dataset(key, data=self.data[key])
+                elif isinstance(self.data[key], Wrapper):
+                    save_group(data_group, self.data[key], key)
+                else:
+                    raise WrapperError("Cannot add the selected type to HDF5 file")
+                
+                if key in self.data_attributes.keys():
+                    for k, v in self.data_attributes[key].items():
+                        dg.attrs[k] = v
+        # except:
+        #     raise WrapperError("The wrapper could not be saved as a HDF5 file")
 
 def load_hdf5_file(filepath):
     """Loads HDF5 files
@@ -362,7 +363,7 @@ def load_hdf5_file(filepath):
         attributes, data_attributes, data = {}, {}, {}
 
         for k, v in group.items(): # Iterate over the group's items
-            if isinstance(v, h5py._hl.dataset.Dataset): data[k] = v # If the item is a dataset, add it to the data dictionary
+            if isinstance(v, h5py._hl.dataset.Dataset): data[k] = v[:] # If the item is a dataset, add it to the data dictionary
             elif isinstance(v, h5py._hl.group.Group):  data[k] = load_group(v) # If the item is a group, add it to the data dictionary
             else: raise WrapperError("Trying to add an object that is neither a group nor a dataset")
 
@@ -376,10 +377,13 @@ def load_hdf5_file(filepath):
     attributes, data_attributes, data = {}, {}, {} 
 
     with h5py.File(filepath, 'r') as hdf5_file:
-        for k in hdf5_file.keys():
-            h5 = hdf5_file[k]
+        for k, v in hdf5_file.attrs.items(): 
+            attributes[k] = v
 
-            if isinstance(h5, h5py._hl.dataset.Dataset): data[k] = h5
+        for k in hdf5_file["Data"].keys():
+            h5 = hdf5_file["Data"][k]
+
+            if isinstance(h5, h5py._hl.dataset.Dataset): data[k] = h5[:]
             elif isinstance(h5, h5py._hl.group.Group): data[k] = load_group(h5)
             else: raise WrapperError("Trying to add an object that is neither a group nor a dataset")
             

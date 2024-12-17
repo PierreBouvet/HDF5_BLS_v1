@@ -145,22 +145,23 @@ def test_save_as_hdf5():
     assert wrp.data["Data_1"].data["Abscissa_0"].shape == (512,), "FAIL - test_save_as_hdf5 - The shape of the data is not the same"
 
 def test_add_hdf5_to_wrapper():
-    wrp_0 = Wrapper({"ID": "Data_1", "Name": "t = 2s"}, 
+    wrp_0 = Wrapper({"ID": "Data", "Name": "Time"}, 
                  {"Raw_data": np.random.random(512), "Abscissa_0": np.arange(512)},
                  {})
     
-    wrp_0.save_as_hdf5(os.path.join(os.path.dirname(__file__), "test_data", "test_save_2.h5"))
-    
-    wrp = Wrapper({"ID": "Data", "Name": "Time"}, 
-                 {"Data_0": wrp_0},
+    wrp_1 = Wrapper({"ID": "Data", "Name": "Time"}, 
+                 {"Raw_data": np.random.random(512), "Abscissa_0": np.arange(512)},
                  {})
     
-    wrp.add_hdf5_to_wrapper(os.path.join(os.path.dirname(__file__), "test_data", "test_save_2.h5"))
+    wrp = Wrapper({"ID": "Data", "Name": "Time"}, 
+                 {"Data_0": wrp_0, "Data_1": wrp_1},
+                 {})
+    
+    wrp.add_hdf5_to_wrapper(os.path.join(os.path.dirname(__file__), "test_data", "test_save.h5"))
 
-    # print(wrp.data.keys())
-    # print('\t',wrp.data["Data_0"].data.keys())
+    assert "Data_2" in wrp.data.keys(), "FAIL - test_add_hdf5_to_wrapper - A new group was not added to the wrapper"
+    assert list(wrp.data["Data_2"].data.keys()) == ["Data_0", "Data_1"], "FAIL - test_add_hdf5_to_wrapper - The group was not added to the wrapper"
+    assert wrp.data["Data_2"].data["Data_0"].data["Raw_data"].shape == (512,), "FAIL - test_add_hdf5_to_wrapper - The shape of the data is not the same"
+    assert wrp.data["Data_2"].data["Data_1"].data["Raw_data"].shape == (512,), "FAIL - test_add_hdf5_to_wrapper - The shape of the data is not the same"
 
-    # wrp.save_as_hdf5(os.path.join(os.path.dirname(__file__), "test_data", "test_save_2.h5"))
-
-test_add_hdf5_to_wrapper()
 
