@@ -8,7 +8,6 @@ class TreatmentError(Exception):
     def __init__(self, message):
         super().__init__(message)
 
-
 class Treat():
     """This class is meant to offer a standard way of treating the data. Please refer to the dedicated `notebook`_. to find explicit descriptions of the algorithms.
 

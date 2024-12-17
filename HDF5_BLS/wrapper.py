@@ -34,7 +34,7 @@ class Wrapper:
         self.data = data # Dictionnary storing all the datasets or wrapper objects, group "Data" of HDF5 file
         self.data_attributes = data_attributes # Dictionnary storing all the attributes of all the data elements
 
-    def add_hdf5_to_wrapper(self, filepath, parent_group = "Data", create_group = True):
+    def add_hdf5_to_wrapper(self, filepath, parent_group = "Data"):
         """Adds an hdf5 file to the wrapper by specifying in which group the data have to be stored. Default is the "Data" group. When adding the data, the attributes of the HDF5 file are only added to the created group if they are different from the parent's attribute.
 
         Parameters
@@ -43,35 +43,28 @@ class Wrapper:
             The filepath of the hdf5 file to add.
         parent_group : str, optional
             The parent group where to store the data of the HDF5 file, by default the parent group is the top group "Data". The format of this group should be "Data.Data_0.Data_0_0"
-        create_group : bool, default True
-            This parameter should be set to False if different techniques were used to acquire different datasets. This is particularly usefull if fluorescent images are taken after or during the same experiment. Note that only data of same shape, and sharing the same abscissa can be used in a given group. 
         """
-        # Create a wrapper object with the contents of the hdf5 file
-        wrp_h5 = load_hdf5_file(filepath)
-
-        # Find the position where to add the spectrum
-        loc = parent_group.split(".")
-        loc.pop(0)
+        # Find the position where to add the HDF5 file
         par = self.data 
+        if parent_group is not None:
+            loc = parent_group.split(".")
+            while len(loc)>0:
+                temp = loc[0]
+                if not temp in par.keys():
+                    par[temp] = Wrapper()
+                par = par[temp].data
+                loc.pop(0)
+        
+        # Getting the i number of Data_i where to store the file
+        i = 0
+        while f"Data_{i}" in par.keys(): i+=1
 
-        while len(loc)>0:
-            temp = loc[0]
-            try:
-                par = par[temp]
-            except:
-                par[temp] = {}
-                par = par[temp]
-            loc.pop(0)
+        wrp = load_hdf5_file(filepath)
+        print(wrp.data.keys())
 
-        # Inspects the structure of the parent group and decides if to create a sub-group or not based on the create_group parameter
-        if "Data_0" in par.keys():
-            i = 0
-            while f"Data_{i}" in par.keys():
-                i+=1
-            par[f"Data_{i}"] = wrp_h5
-        else:
-            self.attributes, self.data, self.data_attributes = merge_wrappers([self,wrp_h5])
-    
+        # Adding the file to the wrapper
+        par[f"Data_{i}"] = load_hdf5_file(filepath)
+
     def add_data_group_to_wrapper(self, data, parent_group = None, name = None): # Test made
         """Adds data to the wrapper by creating a new group.
 
@@ -257,7 +250,7 @@ class Wrapper:
                     abscissa.append(self.data_attributes[f"Abscissa_{k}"]["Name"])
             self.attributes["MEASURE.Abscissa_Names"] = ','.join(abscissa)
         
-    def import_properties_data(self, filepath):
+    def import_properties_data(self, filepath, update = False): # Test made
         """Imports properties from a CSV file into a dictionary.
     
         Parameters
@@ -273,43 +266,13 @@ class Wrapper:
         with open(filepath, mode='r') as csv_file:
             csv_reader = csv.reader(csv_file)
             for row in csv_reader:
-                key, value = row
-                self.attributes[key] = value
-        return self.attributes
-
-    def open_data(self, filepath, store_filepath = True):
-        """Opens a raw data file based on its file extension and stores the filepath.
-    
-        Parameters
-        ----------
-        filepath : str                           
-            The filepath to the raw data file
-        store_filepath: bool, default True
-            A boolean parameter to store the original filepath of the raw data in the attributes of "Raw_data"
-        """
-        # Opens the raw file and retrieve the retrievable attributes
-        data, attributes = load_general(filepath)
-
-        # Add the raw data to the "Raw_data" dataset of the wrapper and writes the dimensionnality of the data
-        self.data["Raw_data"] = data
-        self.data_attributes["Raw_data"] = {"ID":"Raw_data"}
-        if store_filepath: self.data_attributes["Raw_data"]["Filepath"] = filepath
-        attributes["MEASURE.Dimensionnality_of_measure"] = len(data.shape)
-        self.data_attributes["Raw_data"]["Name"] = "Raw data"
-        
-        # Generate the abscissa corresponding to the different dimensions
-        abscissa_name = ""
-        for i, k in enumerate(data.shape):
-            self.data[f"Abscissa_{i}"] = np.arange(k)
-            self.data_attributes[f"Abscissa_{i}"] = {"ID":f"Abscissa_{i}"}
-            abscissa_name = abscissa_name + "_,"
-        attributes["MEASURE.Abscissa_Names"] = abscissa_name[:-1]
-
-        #Indicates the version of the BLS_HDF5 library
-        attributes["FILEPROP.BLS_HDF5_Version"] = BLS_HDF5_Version
-        
-        # Storing the retrieved attributes
-        self.attributes = attributes
+                if len(row[0].split("."))>1 and row[0].split(".")[0] in ["FILEPROP", "SPECTROMETER", "MEASURE"]:
+                    key, value = row[0], row[1]
+                    if key in self.attributes.keys():
+                        if update:
+                            self.attributes[key] = value
+                    else:
+                        self.attributes[key] = value
 
     def save_as_hdf5(self,filepath):
         """Saves the data and attributes to an HDF5 file.
@@ -328,12 +291,14 @@ class Wrapper:
             data_group = parent.create_group(id_group)
             for key, value in group.attributes.items():
                 data_group.attrs[key] = value
+
             for key in group.data.keys():
-                if type(group.data[key]) == np.ndarray:
+                if isinstance(group.data[key], np.ndarray):
                     dg = data_group.create_dataset(key, data=group.data[key])
-                    for k, v in group.data_attributes[key].items():
-                        dg.attrs[k] = v
-                elif type(group[key]) == Wrapper:
+                    if key in group.data_attributes.keys():
+                        for k, v in group.data_attributes[key].items():
+                            dg.attrs[k] = v
+                elif isinstance(group[key], Wrapper):
                     save_group(data_group, group[key], key)
                 else:
                     raise WrapperError("Cannot add the selected type to HDF5 file")
@@ -344,23 +309,24 @@ class Wrapper:
                 # Save attributes
                 for key, value in self.attributes.items():
                     hdf5_file.attrs[key] = value
-                
+
                 # Create Data group
                 data_group = hdf5_file.create_group("Data")
 
-                # Save datasets 
+                # Save datasets and apply the attributes
                 for key in self.data.keys():
-                    if type(self.data[key]) == np.ndarray:
+                    if isinstance(self.data[key], np.ndarray):
                         dg = data_group.create_dataset(key, data=self.data[key])
-                    elif type(self.data[key]) == Wrapper:
+                    elif isinstance(self.data[key], Wrapper):
                         save_group(data_group, self.data[key], key)
                     else:
                         raise WrapperError("Cannot add the selected type to HDF5 file")
-                    for k, v in self.data_attributes[key].items():
-                        dg.attrs[k] = v
+                    
+                    if key in self.data_attributes.keys():
+                        for k, v in self.data_attributes[key].items():
+                            dg.attrs[k] = v
         except:
             raise WrapperError("The wrapper could not be saved as a HDF5 file")
-
 
 def load_hdf5_file(filepath):
     """Loads HDF5 files

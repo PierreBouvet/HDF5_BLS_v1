@@ -37,7 +37,8 @@ def test_load_general():
     filepath = os.listdir(os.path.join(os.path.dirname(__file__), "test_data"))
 
     for fp in filepath:
-        _, attributes = load_general(os.path.join(os.path.dirname(__file__), "test_data",fp))
-        name = ".".join(os.path.basename(fp).split(".")[:-1])
-        assert attributes['FILEPROP.Name'] == name
-
+        _, ext = os.path.splitext(fp)
+        if ext.lower() in [".dat", ".tif", ".npy"]:
+            _, attributes = load_general(os.path.join(os.path.dirname(__file__), "test_data",fp))
+            name = ".".join(os.path.basename(fp).split(".")[:-1])
+            assert attributes['FILEPROP.Name'] == name

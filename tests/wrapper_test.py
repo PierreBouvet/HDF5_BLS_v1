@@ -110,4 +110,57 @@ def test_import_abscissa_1D():
     assert wrp.data_attributes["Abscissa_0"]["Name"] == "Frequency (GHz)", "FAILURE - test_import_abscissa_1D - The name of the abscissa is wrong"
     assert wrp.attributes["MEASURE.Abscissa_Names"] == "Frequency (GHz)", "FAILURE - test_import_abscissa_1D - The name of the abscissa stored in the attributes of the wrapperis wrong"   
 
+def test_import_properties_data():
+    wrp= Wrapper({"ID": "Data_0", "Name": "t = 1s"}, 
+                 {"Raw_data": np.random.random(512), "Abscissa_0": np.array([0])}, 
+                 {})
+    
+    wrp.import_properties_data(os.path.join(os.path.dirname(__file__), "test_data", "example_attributes.csv"))
+
+    assert wrp.attributes["SPECTROMETER.Wavelength_nm"] == "532", "FAILURE - test_import_properties_data - Error in the import of the properties"
+    assert wrp.attributes["MEASURE.Sample"] == "Water", "FAILURE - test_import_properties_data - Error in the import of the properties"
+
+def test_save_as_hdf5():
+    wrp_0 = Wrapper({"ID": "Data_0", "Name": "t = 1s"}, 
+                 {"Raw_data": np.random.random(512), "Abscissa_0": np.arange(512)},
+                 {})
+    
+    wrp_1 = Wrapper({"ID": "Data_1", "Name": "t = 2s"}, 
+                 {"Raw_data": np.random.random(512), "Abscissa_0": np.arange(512)},
+                 {})
+    
+    wrp = Wrapper({"ID": "Data", "Name": "Time"}, 
+                 {"Data_0": wrp_0, "Data_1": wrp_1},
+                 {})
+    
+    wrp.save_as_hdf5(os.path.join(os.path.dirname(__file__), "test_data", "test_save.h5"))
+
+    assert os.path.exists(os.path.join(os.path.dirname(__file__), "test_data", "test_save.h5")), "FAIL - test_save_as_hdf5 - The file was not saved"
+    assert wrp.attributes == {"ID": "Data", "Name": "Time"}, "FAIL - test_save_as_hdf5 - The attributes of the wrapper are not the same"
+    assert wrp.data["Data_0"].attributes == {"ID": "Data_0", "Name": "t = 1s"}, "FAIL - test_save_as_hdf5 - The attributes of the wrapper are not the same"
+    assert wrp.data["Data_1"].attributes == {"ID": "Data_1", "Name": "t = 2s"}, "FAIL - test_save_as_hdf5 - The attributes of the wrapper are not the same"
+    assert wrp.data["Data_0"].data["Raw_data"].shape == (512,), "FAIL - test_save_as_hdf5 - The shape of the data is not the same"
+    assert wrp.data["Data_1"].data["Raw_data"].shape == (512,), "FAIL - test_save_as_hdf5 - The shape of the data is not the same"
+    assert wrp.data["Data_0"].data["Abscissa_0"].shape == (512,), "FAIL - test_save_as_hdf5 - The shape of the data is not the same"
+    assert wrp.data["Data_1"].data["Abscissa_0"].shape == (512,), "FAIL - test_save_as_hdf5 - The shape of the data is not the same"
+
+def test_add_hdf5_to_wrapper():
+    wrp_0 = Wrapper({"ID": "Data_1", "Name": "t = 2s"}, 
+                 {"Raw_data": np.random.random(512), "Abscissa_0": np.arange(512)},
+                 {})
+    
+    wrp_0.save_as_hdf5(os.path.join(os.path.dirname(__file__), "test_data", "test_save_2.h5"))
+    
+    wrp = Wrapper({"ID": "Data", "Name": "Time"}, 
+                 {"Data_0": wrp_0},
+                 {})
+    
+    wrp.add_hdf5_to_wrapper(os.path.join(os.path.dirname(__file__), "test_data", "test_save_2.h5"))
+
+    # print(wrp.data.keys())
+    # print('\t',wrp.data["Data_0"].data.keys())
+
+    # wrp.save_as_hdf5(os.path.join(os.path.dirname(__file__), "test_data", "test_save_2.h5"))
+
+test_add_hdf5_to_wrapper()
 
