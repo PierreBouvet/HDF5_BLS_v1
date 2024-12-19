@@ -45,6 +45,14 @@ We will then take care of the issue as soon as possible.
 > ### Legal Notice <!-- omit in toc -->
 > When contributing to this project, you must agree that you have authored 100% of the content, that you have the necessary rights to the content and that the content you contribute may be provided under the project license.
 
+### Setting up the project
+
+To set up the project locally, you need to follow the instructions in the [guides/Setup/SetUpDevelopperGuide.pdf](https://github.com/PierreBouvet/HDF5_BLS_v1/blob/main/guides/Setup/SetUpDevelopperGuide.pdf) file.
+
+### Creating new functions to import data
+
+To import a new format, you need to create a new function in the \texttt{load\_data} module. A dedicated guide is available in the [guides/Module/ModuleDevelopperGuide.pdf](https://github.com/PierreBouvet/HDF5_BLS_v1/blob/main/guides/Module/ModuleDevelopperGuide.pdf) file.
+
 ### Reporting Bugs
 
 <!-- omit in toc -->
