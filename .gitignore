@@ -1,6 +1,7 @@
 .vscode/
 .venv/
 .pytest_cache/
+.DS_Store
 tests/example_creator.py
 guides/Module/ModuleDevelopperGuide.aux
 guides/Module/ModuleDevelopperGuide.fdb_latexmk
