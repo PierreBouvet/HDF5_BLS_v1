@@ -149,11 +149,11 @@ def test_add_hdf5_to_wrapper():
                  {"Raw_data": np.random.random(512), "Abscissa_0": np.arange(512)},
                  {})
     
-    wrp_1 = Wrapper({"ID": "Data", "Name": "Time"}, 
+    wrp_1 = Wrapper({"ID": "Data", "Name": "t0"}, 
                  {"Raw_data": np.random.random(512), "Abscissa_0": np.arange(512)},
                  {})
     
-    wrp = Wrapper({"ID": "Data", "Name": "Time"}, 
+    wrp = Wrapper({"ID": "Data", "Name": "t1"}, 
                  {"Data_0": wrp_0, "Data_1": wrp_1},
                  {})
     
@@ -163,5 +163,4 @@ def test_add_hdf5_to_wrapper():
     assert list(wrp.data["Data_2"].data.keys()) == ["Data_0", "Data_1"], "FAIL - test_add_hdf5_to_wrapper - The group was not added to the wrapper"
     assert wrp.data["Data_2"].data["Data_0"].data["Raw_data"].shape == (512,), "FAIL - test_add_hdf5_to_wrapper - The shape of the data is not the same"
     assert wrp.data["Data_2"].data["Data_1"].data["Raw_data"].shape == (512,), "FAIL - test_add_hdf5_to_wrapper - The shape of the data is not the same"
-
-
+    assert wrp.data["Data_2"].attributes["ID"] == "Data_2", "FAIL - test_add_hdf5_to_wrapper - The ID of the group was not added to the wrapper"

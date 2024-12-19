@@ -34,7 +34,7 @@ class Wrapper:
         self.data = data # Dictionnary storing all the datasets or wrapper objects, group "Data" of HDF5 file
         self.data_attributes = data_attributes # Dictionnary storing all the attributes of all the data elements
 
-    def add_hdf5_to_wrapper(self, filepath, parent_group = None):
+    def add_hdf5_to_wrapper(self, filepath, parent_group = None): # Test made
         """Adds an hdf5 file to the wrapper by specifying in which group the data have to be stored. Default is the "Data" group. When adding the data, the attributes of the HDF5 file are only added to the created group if they are different from the parent's attribute.
 
         Parameters
@@ -59,11 +59,9 @@ class Wrapper:
         i = 0
         while f"Data_{i}" in par.keys(): i+=1
 
-        wrp = load_hdf5_file(filepath)
-        # print(wrp.data.keys())
-
         # Adding the file to the wrapper
         wrp = load_hdf5_file(filepath)
+        wrp.attributes["ID"] = f"Data_{i}"
         par[f"Data_{i}"] = wrp
 
     def add_data_group_to_wrapper(self, data, parent_group = None, name = None): # Test made
@@ -275,7 +273,7 @@ class Wrapper:
                     else:
                         self.attributes[key] = value
 
-    def save_as_hdf5(self,filepath):
+    def save_as_hdf5(self,filepath): # Test made
         """Saves the data and attributes to an HDF5 file.
     
         Parameters
@@ -329,7 +327,7 @@ class Wrapper:
         # except:
         #     raise WrapperError("The wrapper could not be saved as a HDF5 file")
 
-def load_hdf5_file(filepath):
+def load_hdf5_file(filepath): # Test in add_hdf5_to_wrapper
     """Loads HDF5 files
 
     Parameters
