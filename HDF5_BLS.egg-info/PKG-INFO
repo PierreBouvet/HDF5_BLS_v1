@@ -12,5 +12,7 @@ License-File: LICENSE.md
 Requires-Dist: h5py>=3.12
 Requires-Dist: numpy>=2.0
 Requires-Dist: Pillow>=10.0.1
+Requires-Dist: scipy>=1.10
 Requires-Dist: pytest
-Requires-Dist: tox
+Requires-Dist: setuptools
+Requires-Dist: wheel

@@ -1,5 +1,7 @@
 h5py>=3.12
 numpy>=2.0
 Pillow>=10.0.1
+scipy>=1.10
 pytest
-tox
+setuptools
+wheel

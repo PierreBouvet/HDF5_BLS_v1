@@ -12,4 +12,6 @@ HDF5_BLS.egg-info/dependency_links.txt
 HDF5_BLS.egg-info/requires.txt
 HDF5_BLS.egg-info/top_level.txt
 tests/__init__.py
+tests/example_creator.py
+tests/load_data_test.py
 tests/wrapper_test.py

@@ -2,9 +2,10 @@
 
 **HDF5_BLS** is a Python library for handling Brillouin Light Scattering (BLS) data and converting it into a standardized HDF5 format. The library provides functions to open raw data files, define and import abscissa, add metadata, and save the organized data in HDF5 files.
 The library is currently compatible with the following file formats:
-- "*.DAT" files: spectra returned by the GHOST software
-- "*.TIF" files: an image format that can be used to export 2D detector images.
+- "*.dat" files: spectra returned by the GHOST software
+- "*.tif" files: an image format that can be used to export 2D detector images.
 - "*.npy" files: an arbitrary numpy array
+- "*.sif" files: image files obtained with Andor cameras
 
 ## Installation
 

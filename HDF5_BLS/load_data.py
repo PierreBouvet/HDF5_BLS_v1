@@ -3,6 +3,8 @@ import numpy as np
 import os
 from PIL import Image
 import h5py
+import sif_parser
+from datetime import datetime
 
 def load_dat_file(filepath, creator = "GHOST"): # Test made for GHOST
     """Loads DAT files. The DAT files that can be read are obtained from the following configurations:
@@ -108,6 +110,37 @@ def load_npy_file(filepath): # Test made
     attributes['FILEPROP.Name'] = name
     return data, attributes
 
+def load_sif_file(filepath): 
+    """Loads npy files
+
+    Parameters
+    ----------
+    filepath : str                           
+        The filepath to the npy file
+    
+    Returns
+    -------
+    data : np.array
+        The data stored in the file
+    attributes : dic
+        A dictionnary with all the properties that could be recovered from the file
+    """
+    metadata = {}
+    name, _ = os.path.splitext(filepath)
+    attributes = {}
+
+    data, info = sif_parser.np_open(filepath)
+
+
+    attributes['MEASURE.Exposure_s'] = str(info["ExposureTime"])
+    attributes['SPECTROMETER.Detector_Model'] = info["DetectorType"]
+    attributes['MEASURE.Date_of_measure'] = datetime.fromtimestamp(info["ExperimentTime"]).isoformat()
+
+    if data.shape[0] == 1:
+        data = data[0]
+
+    return data, attributes
+
 def load_general(filepath): # Test made 
     """Loads files based on their extensions
 
@@ -134,5 +167,8 @@ def load_general(filepath): # Test made
     elif file_extension.lower() == ".npy":
         # Load .npy file format data
         return load_npy_file(filepath)
+    elif file_extension.lower() == ".sif":
+        # Load .npy file format data
+        return load_sif_file(filepath)
     else:
         raise ValueError(f"Unsupported file format: {file_extension}")
