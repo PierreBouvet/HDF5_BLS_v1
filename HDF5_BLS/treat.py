@@ -108,19 +108,25 @@ class Treat():
                 center_frequency = abs(center_frequency)
                 window_peak_find_S = np.where(np.abs(frequency+center_frequency)<window_peak_find/2)
                 pol_temp_S = np.polyfit(frequency[window_peak_find_S], data[window_peak_find_S],2)
-                center_frequency_S = -pol_temp_S[1]/(2*pol_temp_S[0])
                 window_peak_find_AS = np.where(np.abs(frequency-center_frequency)<window_peak_find/2)
                 pol_temp_AS = np.polyfit(frequency[window_peak_find_AS], data[window_peak_find_AS],2)
-                center_frequency_AS = -pol_temp_AS[1]/(2*pol_temp_AS[0])
+                if window_AS.size < 3 or window_S.size < 3:
+                    raise TreatmentError("The window size is too small to fit a polynomial")
+                else:
+                    center_frequency_S = -pol_temp_S[1]/(2*pol_temp_S[0])
+                    center_frequency_AS = -pol_temp_AS[1]/(2*pol_temp_AS[0])
 
-                self.treat_steps.append(f"Windowing of Stokes and anti-Stokes peaks around {center_frequency_S:.2f}GHz and {center_frequency_AS:.2f}GHz respectively")
+                    self.treat_steps.append(f"Windowing of Stokes and anti-Stokes peaks around {center_frequency_S:.2f}GHz and {center_frequency_AS:.2f}GHz respectively")
 
-                center_frequency = center_frequency_S
+                    center_frequency = center_frequency_S
             else:
                 window_peak_find = np.where(np.abs(frequency-center_frequency)<window_peak_find/2)
                 pol_temp = np.polyfit(frequency[window_peak_find], data[window_peak_find],2)
-                center_frequency = -pol_temp[1]/(2*pol_temp[0])
-                self.treat_steps.append(f"Windowing of a single peak around {center_frequency:.2f}GHz ")
+                if window_peak_find.size < 3:
+                    raise TreatmentError("The window size is too small to fit a polynomial")
+                else:
+                    center_frequency = -pol_temp[1]/(2*pol_temp[0])
+                    self.treat_steps.append(f"Windowing of a single peak around {center_frequency:.2f}GHz ")
         except:
             raise TreatmentError("The windowing of the peaks before treatment failed.")
 
